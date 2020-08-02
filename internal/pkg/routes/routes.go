@@ -46,12 +46,15 @@ func (c *Routes) InitRoutes() *chi.Mux {
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
 
+	r.Use(commonHeaders)
+
 	// Routes for index.html & /static/**
 	staticRoutes(r)
 
 	r.Post("/api/login", c.login)
 	r.Post("/api/register", c.register)
 	r.Post("/api/posts", c.createPost)
+	r.Get("/api/post/{post_id}", c.getByID)
 	r.Get("/api/posts/", c.listPosts)
 
 	r.Get("/api/posts/*", func(w http.ResponseWriter, r *http.Request) {
@@ -84,6 +87,7 @@ func toJSON(data interface{}, err error) ([]byte, int) {
 	if err != nil {
 		jsonData = []byte("Can't load data: " + err.Error())
 		status = 500
+		log.Println(status, string(jsonData))
 		return jsonData, status
 	}
 
@@ -93,6 +97,7 @@ func toJSON(data interface{}, err error) ([]byte, int) {
 		status = 500
 	}
 
+	log.Println(status, string(jsonData))
 	return jsonData, status
 }
 
@@ -136,5 +141,12 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
 		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
 		fs.ServeHTTP(w, r)
+	})
+}
+
+func commonHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		next.ServeHTTP(w, r)
 	})
 }
