@@ -1,5 +1,20 @@
 CREATE EXTENSION pgcrypto;
 
+create table users
+(
+    id serial not null
+        constraint users_pk
+            primary key,
+    password varchar(255) not null,
+    admin boolean default false not null,
+    login varchar(255) not null
+);
+
+create unique index users_login_uindex
+    on users (login);
+
+INSERT INTO public.users (password, admin, login) VALUES ('12345678', true, 'basyrov');
+
 create table posts
 (
     id uuid default gen_random_uuid() not null

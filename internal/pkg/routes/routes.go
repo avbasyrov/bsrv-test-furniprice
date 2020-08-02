@@ -3,7 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/posts"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/models"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"log"
@@ -16,7 +16,21 @@ import (
 	"time"
 )
 
-func InitRoutes(postsRepo *posts.Posts) *chi.Mux {
+type Routes struct {
+	authSecret []byte
+	users      models.UsersRepository
+	posts      models.PostRepository
+}
+
+func New(authSecret []byte, users models.UsersRepository, posts models.PostRepository) *Routes {
+	return &Routes{
+		authSecret: authSecret,
+		users:      users,
+		posts:      posts,
+	}
+}
+
+func (c *Routes) InitRoutes() *chi.Mux {
 	r := chi.NewRouter()
 
 	// A good base middleware stack
@@ -33,9 +47,11 @@ func InitRoutes(postsRepo *posts.Posts) *chi.Mux {
 	// Routes for index.html & /static/**
 	staticRoutes(r)
 
+	r.Post("/api/login", c.login)
+	r.Post("/api/register", c.register)
+
 	r.Get("/api/posts/", func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.Background()
-		allPosts, err := postsRepo.List(ctx)
+		allPosts, err := c.posts.List(r.Context())
 		jsonData, status := toJSON(allPosts, err)
 		log.Println(status, string(jsonData))
 
@@ -55,7 +71,7 @@ func InitRoutes(postsRepo *posts.Posts) *chi.Mux {
 		category := path.Base(myUrl.Path)
 
 		ctx := context.Background()
-		allPosts, err := postsRepo.ByCategory(ctx, category)
+		allPosts, err := c.posts.ByCategory(ctx, category)
 		jsonData, status := toJSON(allPosts, err)
 		log.Println(status, string(jsonData))
 
@@ -97,6 +113,14 @@ func staticRoutes(r chi.Router) {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println(string(webDir) + "/index.html")
 		http.ServeFile(w, r, string(webDir)+"/index.html")
+	})
+
+	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(""))
+	})
+
+	r.Get("/manifest.json", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(""))
 	})
 
 	filesDir := http.Dir(filepath.Join(workDir, "web/static"))
