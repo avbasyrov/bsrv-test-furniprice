@@ -26,10 +26,7 @@ func (s *Session) Write(ctx context.Context, userID int) (int64, error) {
 }
 
 func (s *Session) Load(ctx context.Context, sessionID int64) (int, error) {
-	const query = "SELECT id, login, login AS name, " +
-		"CASE WHEN admin IS true THEN 'admin' ELSE 'user' END AS role " +
-		"FROM public.users " +
-		"WHERE id = $1"
+	const query = "SELECT user_id FROM public.sessions WHERE id = $1"
 	userID := 0
 	err := s.db.Sqlx.GetContext(ctx, &userID, query, sessionID)
 	return userID, err
