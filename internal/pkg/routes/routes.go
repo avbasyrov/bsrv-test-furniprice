@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/posts"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -12,7 +13,7 @@ import (
 	"time"
 )
 
-func InitRoutes() *chi.Mux {
+func InitRoutes(postsRepo *posts.Posts) *chi.Mux {
 	r := chi.NewRouter()
 
 	// A good base middleware stack
@@ -30,7 +31,9 @@ func InitRoutes() *chi.Mux {
 	staticRoutes(r)
 
 	r.Get("/api/posts/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println(posts.List())
+		allPosts, err := postsRepo.List(context.Background())
+		log.Println(err)
+		log.Println(allPosts)
 	})
 
 	return r
