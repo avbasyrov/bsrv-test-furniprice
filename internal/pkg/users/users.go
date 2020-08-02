@@ -16,6 +16,16 @@ func New(db *dbcon.Db) *Users {
 	}
 }
 
+func (u *Users) GetByID(ctx context.Context, ID int) (models.User, error) {
+	const query = "SELECT id, login, login AS name, " +
+		"CASE WHEN admin IS true THEN 'admin' ELSE 'user' END AS role " +
+		"FROM public.users " +
+		"WHERE id = $1"
+	var user models.User
+	err := u.db.Sqlx.GetContext(ctx, &user, query, ID)
+	return user, err
+}
+
 func (u *Users) Add(ctx context.Context, login string, password string) (models.User, error) {
 	const query = "INSERT INTO public.users (login, password) VALUES ($1, $2) RETURNING id"
 	lastInsertId := 0

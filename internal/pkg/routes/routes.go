@@ -18,13 +18,15 @@ import (
 
 type Routes struct {
 	authSecret []byte
+	session    models.Session
 	users      models.UsersRepository
 	posts      models.PostRepository
 }
 
-func New(authSecret []byte, users models.UsersRepository, posts models.PostRepository) *Routes {
+func New(authSecret []byte, session models.Session, users models.UsersRepository, posts models.PostRepository) *Routes {
 	return &Routes{
 		authSecret: authSecret,
+		session:    session,
 		users:      users,
 		posts:      posts,
 	}

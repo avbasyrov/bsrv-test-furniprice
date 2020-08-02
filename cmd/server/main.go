@@ -6,6 +6,7 @@ import (
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/dbcon"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/posts"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/routes"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/session"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/users"
 	"log"
 	"net/http"
@@ -17,10 +18,12 @@ func main() {
 
 	cfg := config.New()
 	db := dbcon.New(ctx, cfg.DB)
+	sessionsProvider := session.New(db)
 	postsRepo := posts.New(db)
 	usersRepo := users.New(db)
 
-	httpHandler := routes.New(authSecret, usersRepo, postsRepo).InitRoutes()
+	httpHandler := routes.New(authSecret, sessionsProvider, usersRepo, postsRepo).
+		InitRoutes()
 
 	log.Println("Listening on :8080...")
 	http.ListenAndServe(":8080", httpHandler)

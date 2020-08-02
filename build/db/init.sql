@@ -1,5 +1,14 @@
 CREATE EXTENSION pgcrypto;
 
+create table sessions
+(
+    id bigserial not null
+        constraint sessions_pk
+            primary key,
+    user_id int not null
+);
+
+
 create table users
 (
     id serial not null
