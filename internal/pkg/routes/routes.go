@@ -18,15 +18,15 @@ import (
 
 type Routes struct {
 	authSecret []byte
-	session    models.Session
+	auth       models.AuthManager
 	users      models.UsersRepository
 	posts      models.PostRepository
 }
 
-func New(authSecret []byte, session models.Session, users models.UsersRepository, posts models.PostRepository) *Routes {
+func New(authSecret []byte, auth models.AuthManager, users models.UsersRepository, posts models.PostRepository) *Routes {
 	return &Routes{
+		auth:       auth,
 		authSecret: authSecret,
-		session:    session,
 		users:      users,
 		posts:      posts,
 	}
@@ -51,19 +51,8 @@ func (c *Routes) InitRoutes() *chi.Mux {
 
 	r.Post("/api/login", c.login)
 	r.Post("/api/register", c.register)
-
-	r.Get("/api/posts/", func(w http.ResponseWriter, r *http.Request) {
-		allPosts, err := c.posts.List(r.Context())
-		jsonData, status := toJSON(allPosts, err)
-		log.Println(status, string(jsonData))
-
-		w.WriteHeader(status)
-
-		_, err = w.Write(jsonData)
-		if err != nil {
-			log.Println(err)
-		}
-	})
+	r.Post("/api/posts", c.createPost)
+	r.Get("/api/posts/", c.listPosts)
 
 	r.Get("/api/posts/*", func(w http.ResponseWriter, r *http.Request) {
 		myUrl, err := url.Parse(r.URL.Path)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/auth"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/config"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/dbcon"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/posts"
@@ -18,11 +19,12 @@ func main() {
 
 	cfg := config.New()
 	db := dbcon.New(ctx, cfg.DB)
-	sessionsProvider := session.New(db)
 	postsRepo := posts.New(db)
 	usersRepo := users.New(db)
+	sessionManager := session.New(db)
+	authManager := auth.New(authSecret, sessionManager, usersRepo)
 
-	httpHandler := routes.New(authSecret, sessionsProvider, usersRepo, postsRepo).
+	httpHandler := routes.New(authSecret, authManager, usersRepo, postsRepo).
 		InitRoutes()
 
 	log.Println("Listening on :8080...")

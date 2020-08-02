@@ -17,21 +17,19 @@ func New(db *dbcon.Db) *Posts {
 }
 
 func (p *Posts) List(ctx context.Context) ([]models.Post, error) {
-	const query = "SELECT p.id, p.score, p.views, p.title, p.url, p.upvote as UpvotePercentage, p.created, " +
-		"c.title as category " +
-		"FROM posts p " +
-		"LEFT JOIN categories c ON c.id = p.category_id"
+	const query = "SELECT p.id, p.score, p.views, p.title, p.url, p.text, p.upvote as UpvotePercentage, p.created, " +
+		"p.category, CASE WHEN p.is_link IS TRUE THEN 'link' ELSE 'text' END AS type  " +
+		"FROM posts p"
 	var posts []models.Post
 	err := p.db.Sqlx.SelectContext(ctx, &posts, query)
 	return posts, err
 }
 
 func (p *Posts) ByCategory(ctx context.Context, category string) ([]models.Post, error) {
-	const query = "SELECT p.id, p.score, p.views, p.title, p.url, p.upvote as UpvotePercentage, p.created, " +
-		"c.title as category " +
+	const query = "SELECT p.id, p.score, p.views, p.title, p.url, p.text, p.upvote as UpvotePercentage, p.created, " +
+		"p.category, CASE WHEN p.is_link IS TRUE THEN 'link' ELSE 'text' END AS type " +
 		"FROM posts p " +
-		"LEFT JOIN categories c ON c.id = p.category_id " +
-		"WHERE c.title = $1"
+		"WHERE p.category = $1"
 	var posts []models.Post
 	err := p.db.Sqlx.SelectContext(ctx, &posts, query, category)
 	return posts, err

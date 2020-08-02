@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"net/http"
 )
@@ -34,19 +33,7 @@ func (c *Routes) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionID, err := c.session.Write(r.Context(), user.ID)
-	if err != nil {
-		jsonError(w, http.StatusInternalServerError, "unable to save session data")
-		return
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user": jwt.MapClaims{
-			"username": user.Login,
-			"id":       user.ID,
-		},
-		"sessionID": sessionID,
-	})
-	tokenString, err := token.SignedString(c.authSecret)
+	tokenString, err := c.auth.BeginSession(r.Context(), user.ID, user.Login)
 	if err != nil {
 		jsonError(w, http.StatusInternalServerError, err.Error())
 		return
