@@ -26,8 +26,7 @@ type Post struct {
 	Category         string           `json:"category"`
 	Type             string           `json:"type"`
 	Votes            *json.RawMessage `json:"votes"`
-	// TODO:
-	Comments []string `json:"comments"`
+	Comments         *json.RawMessage `json:"comments"`
 }
 
 func (c *Routes) upVote(w http.ResponseWriter, r *http.Request) {
@@ -202,6 +201,8 @@ func (c *Routes) respondWithPost(w http.ResponseWriter, r *http.Request, postID 
 
 func (c *Routes) preparePostToJSON(p interfaces.Post) Post {
 	votesJson := json.RawMessage(p.Votes)
+	commentsJson := json.RawMessage(p.Comments)
+
 	return Post{
 		Id:    p.Id,
 		Score: p.Score,
@@ -218,6 +219,6 @@ func (c *Routes) preparePostToJSON(p interfaces.Post) Post {
 		Category:         p.Category,
 		Type:             p.Type,
 		Votes:            &votesJson,
-		Comments:         nil,
+		Comments:         &commentsJson,
 	}
 }

@@ -21,7 +21,12 @@ const selectQuery = "SELECT p.id, p.views, p.title, p.url, p.text, p.created, " 
 	"(SELECT CASE WHEN COUNT(vv.vote) > 0 THEN 100 * (SUM(vv.vote) + COUNT(vv.vote)) / (2 * COUNT(vv.vote)) ELSE 100 END AS UpvotePercentage FROM public.votes vv WHERE vv.post_id = p.id) AS UpvotePercentage, " +
 	"p.category, p.author_id AS AuthorID, u.login AS AuthorName, " +
 	"CASE WHEN p.is_link IS TRUE THEN 'link' ELSE 'text' END AS type,  " +
-	"(SELECT COALESCE(json_agg(json_build_object('user', v.user_id, 'vote', v.vote)), '[]') FROM votes v WHERE v.post_id = p.id) AS votes " +
+	"(SELECT COALESCE(json_agg(json_build_object('user', v.user_id, 'vote', v.vote)), '[]') FROM votes v WHERE v.post_id = p.id) AS votes, " +
+	"(SELECT COALESCE(json_agg(json_build_object('author', " +
+	"json_build_object('username', u.login, 'admin', u.admin, 'id', u.id), " +
+	"'body', c.body, 'created', c.created, 'id', c.id)), '[]') " +
+	"FROM comments c LEFT JOIN users u ON u.id = c.author_id WHERE c.post_id = p.id" +
+	") AS comments " +
 	"FROM posts p " +
 	"LEFT JOIN users u ON u.id = p.author_id "
 
