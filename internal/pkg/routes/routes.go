@@ -45,25 +45,27 @@ func (c *Routes) InitRoutes() *chi.Mux {
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	// Set application-json header
-	r.Use(commonHeaders)
-
 	// Routes for index.html & /static/**
 	staticRoutes(r)
 
-	r.Post("/api/login", c.login)
-	r.Post("/api/register", c.register)
-	r.Post("/api/posts", c.createPost)
-	r.Get("/api/post/{post_id}", c.getByID)
-	r.Get("/api/posts/", c.listPosts)
-	r.Get("/api/user/{user_name}", c.getByAuthor)
-	r.Get("/api/post/{post_id}/upvote", c.upVote)
-	r.Get("/api/post/{post_id}/unvote", c.unVote)
-	r.Get("/api/post/{post_id}/downvote", c.downVote)
-	r.Delete("/api/post/{post_id}", c.deletePost)
-	r.Post("/api/post/{post_id}", c.addComment)
-	r.Delete("/api/post/{post_id}/{comment_id}", c.deleteComment)
-	r.Get("/api/posts/{category}", c.listPostsByCategory)
+	r.Group(func(r chi.Router) {
+		// Set application-json header
+		r.Use(jsonHeaders)
+
+		r.Post("/api/login", c.login)
+		r.Post("/api/register", c.register)
+		r.Post("/api/posts", c.createPost)
+		r.Get("/api/post/{post_id}", c.getByID)
+		r.Get("/api/posts/", c.listPosts)
+		r.Get("/api/user/{user_name}", c.getByAuthor)
+		r.Get("/api/post/{post_id}/upvote", c.upVote)
+		r.Get("/api/post/{post_id}/unvote", c.unVote)
+		r.Get("/api/post/{post_id}/downvote", c.downVote)
+		r.Delete("/api/post/{post_id}", c.deletePost)
+		r.Post("/api/post/{post_id}", c.addComment)
+		r.Delete("/api/post/{post_id}/{comment_id}", c.deleteComment)
+		r.Get("/api/posts/{category}", c.listPostsByCategory)
+	})
 
 	return r
 }
@@ -74,7 +76,7 @@ func staticRoutes(r chi.Router) {
 	webDir := http.Dir(filepath.Join(workDir, "web"))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "text/html; charset=utf-8")
+		//w.Header().Add("Content-Type", "text/html; charset=utf-8")
 		http.ServeFile(w, r, string(webDir)+"/index.html")
 	})
 	r.Get("/u/*", func(w http.ResponseWriter, r *http.Request) {
@@ -85,12 +87,16 @@ func staticRoutes(r chi.Router) {
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
 		http.ServeFile(w, r, string(webDir)+"/index.html")
 	})
+	r.HandleFunc("/favicon.svg", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "image/svg+xml")
+		_, _ = w.Write([]byte("<svg xmlns=\"http://www.w3.org/2000/svg\"><text y=\"32\" font-size=\"32\">🚀</text></svg>"))
+	})
 
 	filesDir := http.Dir(filepath.Join(workDir, "web/static"))
 	fileServer(r, "/static", filesDir)
 }
 
-func commonHeaders(next http.Handler) http.Handler {
+func jsonHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
 		next.ServeHTTP(w, r)
