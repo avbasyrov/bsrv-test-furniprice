@@ -56,6 +56,9 @@ func (c *Routes) InitRoutes() *chi.Mux {
 	r.Post("/api/posts", c.createPost)
 	r.Get("/api/post/{post_id}", c.getByID)
 	r.Get("/api/posts/", c.listPosts)
+	r.Get("/api/post/{post_id}/upvote", c.upvote)
+	r.Get("/api/post/{post_id}/unvote", c.unvote)
+	r.Get("/api/post/{post_id}/downvote", c.downvote)
 
 	r.Get("/api/posts/*", func(w http.ResponseWriter, r *http.Request) {
 		myUrl, err := url.Parse(r.URL.Path)

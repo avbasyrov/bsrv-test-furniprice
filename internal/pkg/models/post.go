@@ -18,6 +18,7 @@ type Post struct {
 	Created          time.Time
 	Category         string
 	Type             string
+	Votes            string
 }
 
 type PostRepository interface {
@@ -25,4 +26,7 @@ type PostRepository interface {
 	List(context.Context) ([]Post, error)
 	ByCategory(ctx context.Context, category string) ([]Post, error)
 	GetByID(ctx context.Context, postID string) (Post, error)
+	VoteUp(ctx context.Context, postID string, userID int) error
+	UnVote(ctx context.Context, postID string, userID int) error
+	VoteDown(ctx context.Context, postID string, userID int) error
 }

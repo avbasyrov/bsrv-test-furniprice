@@ -17,22 +17,74 @@ type Post struct {
 		Username string `json:"username"`
 		ID       int    `json:"id"`
 	} `json:"author"`
-	Views            int       `json:"views"`
-	Title            string    `json:"title"`
-	Url              string    `json:"url"`
-	Text             string    `json:"text"`
-	UpvotePercentage int       `json:"upvotePercentage"`
-	Created          time.Time `json:"created"`
-	Category         string    `json:"category"`
-	Type             string    `json:"type"`
+	Views            int              `json:"views"`
+	Title            string           `json:"title"`
+	Url              string           `json:"url"`
+	Text             string           `json:"text"`
+	UpvotePercentage int              `json:"upvotePercentage"`
+	Created          time.Time        `json:"created"`
+	Category         string           `json:"category"`
+	Type             string           `json:"type"`
+	Votes            *json.RawMessage `json:"votes"`
 	// TODO:
-	Votes    []string `json:"votes"`
 	Comments []string `json:"comments"`
 }
 
-func (c *Routes) createPost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json; charset=utf-8")
+func (c *Routes) upvote(w http.ResponseWriter, r *http.Request) {
+	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
+	if err != nil {
+		jsonError(w, http.StatusForbidden, "auth error")
+		return
+	}
 
+	postID := chi.URLParam(r, "post_id")
+
+	err = c.posts.VoteUp(r.Context(), postID, userID)
+	if err != nil {
+		jsonError(w, http.StatusForbidden, "auth error")
+		return
+	}
+
+	c.respondWithPost(w, r, postID)
+}
+
+func (c *Routes) unvote(w http.ResponseWriter, r *http.Request) {
+	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
+	if err != nil {
+		jsonError(w, http.StatusForbidden, "auth error")
+		return
+	}
+
+	postID := chi.URLParam(r, "post_id")
+
+	err = c.posts.UnVote(r.Context(), postID, userID)
+	if err != nil {
+		jsonError(w, http.StatusForbidden, "auth error")
+		return
+	}
+
+	c.respondWithPost(w, r, postID)
+}
+
+func (c *Routes) downvote(w http.ResponseWriter, r *http.Request) {
+	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
+	if err != nil {
+		jsonError(w, http.StatusForbidden, "auth error")
+		return
+	}
+
+	postID := chi.URLParam(r, "post_id")
+
+	err = c.posts.VoteDown(r.Context(), postID, userID)
+	if err != nil {
+		jsonError(w, http.StatusForbidden, "auth error")
+		return
+	}
+
+	c.respondWithPost(w, r, postID)
+}
+
+func (c *Routes) createPost(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Content-Type") != "application/json" {
 		jsonError(w, http.StatusBadRequest, "unknown payload")
 		return
@@ -94,16 +146,13 @@ func (c *Routes) listPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Routes) getByID(w http.ResponseWriter, r *http.Request) {
-	var jsonData []byte
-	var status int
-
 	postID := chi.URLParam(r, "post_id")
+	c.respondWithPost(w, r, postID)
+}
+
+func (c *Routes) respondWithPost(w http.ResponseWriter, r *http.Request, postID string) {
 	postData, err := c.posts.GetByID(r.Context(), postID)
-	if err != nil {
-		jsonData, status = toJSON(nil, err)
-	} else {
-		jsonData, status = toJSON(c.preparePostToJSON(postData), err)
-	}
+	jsonData, status := toJSON(c.preparePostToJSON(postData), err)
 
 	w.WriteHeader(status)
 	_, err = w.Write(jsonData)
@@ -113,6 +162,7 @@ func (c *Routes) getByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Routes) preparePostToJSON(p models.Post) Post {
+	votesJson := json.RawMessage(p.Votes)
 	return Post{
 		Id:    p.Id,
 		Score: p.Score,
@@ -128,7 +178,7 @@ func (c *Routes) preparePostToJSON(p models.Post) Post {
 		Created:          p.Created,
 		Category:         p.Category,
 		Type:             p.Type,
-		Votes:            nil,
+		Votes:            &votesJson,
 		Comments:         nil,
 	}
 }

@@ -19,6 +19,16 @@ create table users
     login varchar(255) not null
 );
 
+
+create table votes
+(
+    post_id uuid not null,
+    user_id int not null,
+    vote smallint not null,
+    constraint votes_pk
+        primary key (post_id, user_id)
+);
+
 create unique index users_login_uindex
     on users (login);
 
@@ -29,11 +39,9 @@ create table posts
     id uuid default gen_random_uuid() not null
         constraint posts_pk
             primary key,
-    score integer default 0 not null,
     views integer default 0 not null,
     title varchar(255) not null,
     url varchar(255) not null,
-    upvote integer default 0 not null,
     created timestamp not null,
     author_id integer default 1 not null,
     category varchar(20) default 'news'::character varying not null,
