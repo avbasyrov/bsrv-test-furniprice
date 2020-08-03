@@ -3,7 +3,7 @@ package posts
 import (
 	"context"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/dbcon"
-	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/models"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/interfaces"
 )
 
 type Posts struct {
@@ -25,24 +25,31 @@ const selectQuery = "SELECT p.id, p.views, p.title, p.url, p.text, p.created, " 
 	"FROM posts p " +
 	"LEFT JOIN users u ON u.id = p.author_id "
 
-func (p *Posts) List(ctx context.Context) ([]models.Post, error) {
-	var posts []models.Post
+func (p *Posts) List(ctx context.Context) ([]interfaces.Post, error) {
+	var posts []interfaces.Post
 	err := p.db.Sqlx.SelectContext(ctx, &posts, selectQuery)
 	return posts, err
 }
 
-func (p *Posts) ByCategory(ctx context.Context, category string) ([]models.Post, error) {
+func (p *Posts) ByCategory(ctx context.Context, category string) ([]interfaces.Post, error) {
 	const query = selectQuery + "WHERE p.category = $1"
-	var posts []models.Post
+	var posts []interfaces.Post
 	err := p.db.Sqlx.SelectContext(ctx, &posts, query, category)
 	return posts, err
 }
 
-func (p *Posts) GetByID(ctx context.Context, postID string) (models.Post, error) {
+func (p *Posts) GetByID(ctx context.Context, postID string) (interfaces.Post, error) {
 	const query = selectQuery + "WHERE p.id = $1"
-	var post models.Post
+	var post interfaces.Post
 	err := p.db.Sqlx.GetContext(ctx, &post, query, postID)
 	return post, err
+}
+
+func (p *Posts) ByAuthor(ctx context.Context, authorID int) ([]interfaces.Post, error) {
+	const query = selectQuery + "WHERE p.author_id = $1"
+	var posts []interfaces.Post
+	err := p.db.Sqlx.SelectContext(ctx, &posts, query, authorID)
+	return posts, err
 }
 
 func (p *Posts) Delete(ctx context.Context, postID string) error {

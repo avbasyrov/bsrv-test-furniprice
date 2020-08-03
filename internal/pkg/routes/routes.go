@@ -3,7 +3,7 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/models"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/interfaces"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"log"
@@ -18,12 +18,12 @@ import (
 
 type Routes struct {
 	authSecret []byte
-	auth       models.AuthManager
-	users      models.UsersRepository
-	posts      models.PostRepository
+	auth       interfaces.AuthManager
+	users      interfaces.UsersRepository
+	posts      interfaces.PostRepository
 }
 
-func New(authSecret []byte, auth models.AuthManager, users models.UsersRepository, posts models.PostRepository) *Routes {
+func New(authSecret []byte, auth interfaces.AuthManager, users interfaces.UsersRepository, posts interfaces.PostRepository) *Routes {
 	return &Routes{
 		auth:       auth,
 		authSecret: authSecret,
@@ -111,7 +111,12 @@ func staticRoutes(r chi.Router) {
 	webDir := http.Dir(filepath.Join(workDir, "web"))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println(string(webDir) + "/index.html")
+		http.ServeFile(w, r, string(webDir)+"/index.html")
+	})
+	r.Get("/u/*", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, string(webDir)+"/index.html")
+	})
+	r.Get("/a/*", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, string(webDir)+"/index.html")
 	})
 

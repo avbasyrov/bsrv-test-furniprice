@@ -1,4 +1,4 @@
-package models
+package interfaces
 
 import (
 	"context"
@@ -26,6 +26,7 @@ type PostRepository interface {
 	Delete(ctx context.Context, postID string) error
 	List(ctx context.Context) ([]Post, error)
 	ByCategory(ctx context.Context, category string) ([]Post, error)
+	ByAuthor(ctx context.Context, authorID int) ([]Post, error)
 	GetByID(ctx context.Context, postID string) (Post, error)
 	VoteUp(ctx context.Context, postID string, userID int) error
 	UnVote(ctx context.Context, postID string, userID int) error

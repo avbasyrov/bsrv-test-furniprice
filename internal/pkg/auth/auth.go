@@ -4,17 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/models"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/interfaces"
 	"github.com/dgrijalva/jwt-go"
 )
 
 type Auth struct {
 	jwtSecret      []byte
-	users          models.UsersRepository
-	sessionManager models.Session
+	users          interfaces.UsersRepository
+	sessionManager interfaces.Session
 }
 
-func New(jwtSecret []byte, sessionManager models.Session, users models.UsersRepository) *Auth {
+func New(jwtSecret []byte, sessionManager interfaces.Session, users interfaces.UsersRepository) *Auth {
 	return &Auth{
 		jwtSecret:      jwtSecret,
 		users:          users,

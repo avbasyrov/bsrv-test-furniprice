@@ -2,7 +2,7 @@ package routes
 
 import (
 	"encoding/json"
-	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/models"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/interfaces"
 	"github.com/go-chi/chi"
 	"io/ioutil"
 	"log"
@@ -171,7 +171,7 @@ func (c *Routes) respondWithPost(w http.ResponseWriter, r *http.Request, postID 
 	}
 }
 
-func (c *Routes) preparePostToJSON(p models.Post) Post {
+func (c *Routes) preparePostToJSON(p interfaces.Post) Post {
 	votesJson := json.RawMessage(p.Votes)
 	return Post{
 		Id:    p.Id,
