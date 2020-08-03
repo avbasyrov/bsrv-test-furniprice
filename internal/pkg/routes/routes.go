@@ -56,9 +56,10 @@ func (c *Routes) InitRoutes() *chi.Mux {
 	r.Post("/api/posts", c.createPost)
 	r.Get("/api/post/{post_id}", c.getByID)
 	r.Get("/api/posts/", c.listPosts)
-	r.Get("/api/post/{post_id}/upvote", c.upvote)
-	r.Get("/api/post/{post_id}/unvote", c.unvote)
-	r.Get("/api/post/{post_id}/downvote", c.downvote)
+	r.Get("/api/post/{post_id}/upvote", c.upVote)
+	r.Get("/api/post/{post_id}/unvote", c.unVote)
+	r.Get("/api/post/{post_id}/downvote", c.downVote)
+	r.Delete("/api/post/{post_id}", c.deletePost)
 
 	r.Get("/api/posts/*", func(w http.ResponseWriter, r *http.Request) {
 		myUrl, err := url.Parse(r.URL.Path)
@@ -152,4 +153,12 @@ func commonHeaders(next http.Handler) http.Handler {
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func jsonReply(w http.ResponseWriter, status int, msg string) {
+	resp, _ := json.Marshal(map[string]interface{}{
+		"message": msg,
+	})
+	w.WriteHeader(status)
+	_, _ = w.Write(resp)
 }

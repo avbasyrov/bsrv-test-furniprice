@@ -10,7 +10,7 @@ func (c *Routes) register(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 
 	if r.Header.Get("Content-Type") != "application/json" {
-		jsonError(w, http.StatusBadRequest, "unknown payload")
+		jsonReply(w, http.StatusBadRequest, "unknown payload")
 		return
 	}
 
@@ -23,19 +23,19 @@ func (c *Routes) register(w http.ResponseWriter, r *http.Request) {
 	}{}
 	err := json.Unmarshal(body, fd)
 	if err != nil {
-		jsonError(w, http.StatusBadRequest, "cant unpack payload")
+		jsonReply(w, http.StatusBadRequest, "cant unpack payload")
 		return
 	}
 
 	user, err := c.users.Add(r.Context(), fd.Login, fd.Password)
 	if err != nil {
-		jsonError(w, http.StatusUnauthorized, "bad login or password")
+		jsonReply(w, http.StatusUnauthorized, "bad login or password")
 		return
 	}
 
 	tokenString, err := c.auth.BeginSession(r.Context(), user.ID, user.Login)
 	if err != nil {
-		jsonError(w, http.StatusInternalServerError, err.Error())
+		jsonReply(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

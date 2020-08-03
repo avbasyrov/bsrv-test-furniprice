@@ -44,3 +44,8 @@ func (p *Posts) GetByID(ctx context.Context, postID string) (models.Post, error)
 	err := p.db.Sqlx.GetContext(ctx, &post, query, postID)
 	return post, err
 }
+
+func (p *Posts) Delete(ctx context.Context, postID string) error {
+	_, err := p.db.Sqlx.ExecContext(ctx, "DELETE FROM public.posts WHERE id = $1", postID)
+	return err
+}

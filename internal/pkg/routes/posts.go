@@ -30,10 +30,10 @@ type Post struct {
 	Comments []string `json:"comments"`
 }
 
-func (c *Routes) upvote(w http.ResponseWriter, r *http.Request) {
+func (c *Routes) upVote(w http.ResponseWriter, r *http.Request) {
 	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
 	if err != nil {
-		jsonError(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "auth error")
 		return
 	}
 
@@ -41,17 +41,17 @@ func (c *Routes) upvote(w http.ResponseWriter, r *http.Request) {
 
 	err = c.posts.VoteUp(r.Context(), postID, userID)
 	if err != nil {
-		jsonError(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "auth error")
 		return
 	}
 
 	c.respondWithPost(w, r, postID)
 }
 
-func (c *Routes) unvote(w http.ResponseWriter, r *http.Request) {
+func (c *Routes) unVote(w http.ResponseWriter, r *http.Request) {
 	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
 	if err != nil {
-		jsonError(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "auth error")
 		return
 	}
 
@@ -59,17 +59,17 @@ func (c *Routes) unvote(w http.ResponseWriter, r *http.Request) {
 
 	err = c.posts.UnVote(r.Context(), postID, userID)
 	if err != nil {
-		jsonError(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "auth error")
 		return
 	}
 
 	c.respondWithPost(w, r, postID)
 }
 
-func (c *Routes) downvote(w http.ResponseWriter, r *http.Request) {
+func (c *Routes) downVote(w http.ResponseWriter, r *http.Request) {
 	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
 	if err != nil {
-		jsonError(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "auth error")
 		return
 	}
 
@@ -77,7 +77,7 @@ func (c *Routes) downvote(w http.ResponseWriter, r *http.Request) {
 
 	err = c.posts.VoteDown(r.Context(), postID, userID)
 	if err != nil {
-		jsonError(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "auth error")
 		return
 	}
 
@@ -86,7 +86,7 @@ func (c *Routes) downvote(w http.ResponseWriter, r *http.Request) {
 
 func (c *Routes) createPost(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Content-Type") != "application/json" {
-		jsonError(w, http.StatusBadRequest, "unknown payload")
+		jsonReply(w, http.StatusBadRequest, "unknown payload")
 		return
 	}
 
@@ -102,18 +102,18 @@ func (c *Routes) createPost(w http.ResponseWriter, r *http.Request) {
 	}{}
 	err := json.Unmarshal(body, fd)
 	if err != nil {
-		jsonError(w, http.StatusBadRequest, "cant unpack payload")
+		jsonReply(w, http.StatusBadRequest, "cant unpack payload")
 		return
 	}
 
 	if r.Header.Get("Content-Type") != "application/json" {
-		jsonError(w, http.StatusBadRequest, "unknown payload")
+		jsonReply(w, http.StatusBadRequest, "unknown payload")
 		return
 	}
 
 	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
 	if err != nil {
-		jsonError(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "auth error")
 		return
 	}
 
@@ -148,6 +148,16 @@ func (c *Routes) listPosts(w http.ResponseWriter, r *http.Request) {
 func (c *Routes) getByID(w http.ResponseWriter, r *http.Request) {
 	postID := chi.URLParam(r, "post_id")
 	c.respondWithPost(w, r, postID)
+}
+
+func (c *Routes) deletePost(w http.ResponseWriter, r *http.Request) {
+	postID := chi.URLParam(r, "post_id")
+	err := c.posts.Delete(r.Context(), postID)
+	if err != nil {
+		jsonReply(w, http.StatusInternalServerError, "can't remove POST")
+	} else {
+		jsonReply(w, http.StatusOK, "success")
+	}
 }
 
 func (c *Routes) respondWithPost(w http.ResponseWriter, r *http.Request, postID string) {

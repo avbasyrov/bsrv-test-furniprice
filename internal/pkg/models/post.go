@@ -23,7 +23,8 @@ type Post struct {
 
 type PostRepository interface {
 	Create(ctx context.Context, title string, authorID int, url string, text string, category string, isLink bool) (Post, error)
-	List(context.Context) ([]Post, error)
+	Delete(ctx context.Context, postID string) error
+	List(ctx context.Context) ([]Post, error)
 	ByCategory(ctx context.Context, category string) ([]Post, error)
 	GetByID(ctx context.Context, postID string) (Post, error)
 	VoteUp(ctx context.Context, postID string, userID int) error
