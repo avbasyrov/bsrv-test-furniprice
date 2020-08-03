@@ -56,6 +56,7 @@ func (c *Routes) InitRoutes() *chi.Mux {
 	r.Post("/api/posts", c.createPost)
 	r.Get("/api/post/{post_id}", c.getByID)
 	r.Get("/api/posts/", c.listPosts)
+	r.Get("/api/user/{user_name}", c.getByAuthor)
 	r.Get("/api/post/{post_id}/upvote", c.upVote)
 	r.Get("/api/post/{post_id}/unvote", c.unVote)
 	r.Get("/api/post/{post_id}/downvote", c.downVote)
@@ -121,6 +122,9 @@ func staticRoutes(r chi.Router) {
 	})
 
 	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(""))
+	})
+	r.Head("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(""))
 	})
 

@@ -47,8 +47,18 @@ func (u *Users) GetByLoginAndPassword(ctx context.Context, login string, passwor
 	const query = "SELECT id, login, login AS name, " +
 		"CASE WHEN admin IS true THEN 'admin' ELSE 'user' END AS role " +
 		"FROM public.users " +
-		"WHERE login LIKE $1 AND password LIKE $2"
+		"WHERE login = $1 AND password = $2"
 	var user interfaces.User
 	err := u.db.Sqlx.GetContext(ctx, &user, query, login, password)
+	return user, err
+}
+
+func (u *Users) GetByLogin(ctx context.Context, login string) (interfaces.User, error) {
+	const query = "SELECT id, login, login AS name, " +
+		"CASE WHEN admin IS true THEN 'admin' ELSE 'user' END AS role " +
+		"FROM public.users " +
+		"WHERE login = $1"
+	var user interfaces.User
+	err := u.db.Sqlx.GetContext(ctx, &user, query, login)
 	return user, err
 }

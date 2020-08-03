@@ -12,5 +12,6 @@ type User struct {
 type UsersRepository interface {
 	Add(ctx context.Context, login string, password string) (User, error)
 	GetByID(ctx context.Context, ID int) (User, error)
+	GetByLogin(ctx context.Context, login string) (User, error)
 	GetByLoginAndPassword(ctx context.Context, login string, password string) (User, error)
 }

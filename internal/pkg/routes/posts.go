@@ -150,6 +150,35 @@ func (c *Routes) getByID(w http.ResponseWriter, r *http.Request) {
 	c.respondWithPost(w, r, postID)
 }
 
+func (c *Routes) getByAuthor(w http.ResponseWriter, r *http.Request) {
+	authorName := chi.URLParam(r, "user_name")
+	user, err := c.users.GetByLogin(r.Context(), authorName)
+	if err != nil {
+		jsonReply(w, http.StatusInternalServerError, "can't load given user")
+		return
+	}
+
+	posts, err := c.posts.ByAuthor(r.Context(), user.ID)
+	if err != nil {
+		jsonReply(w, http.StatusInternalServerError, "can't load posts for given user")
+		return
+	}
+
+	jsonPosts := make([]Post, 0, len(posts))
+
+	for _, postData := range posts {
+		jsonPosts = append(jsonPosts, c.preparePostToJSON(postData))
+	}
+
+	jsonData, status := toJSON(jsonPosts, err)
+
+	w.WriteHeader(status)
+	_, err = w.Write(jsonData)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
 func (c *Routes) deletePost(w http.ResponseWriter, r *http.Request) {
 	postID := chi.URLParam(r, "post_id")
 	err := c.posts.Delete(r.Context(), postID)
