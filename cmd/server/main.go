@@ -4,10 +4,12 @@ import (
 	"context"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/auth"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/config"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/dal/comments"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/dal/posts"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/dal/session"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/dal/users"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/dbcon"
+	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/reddit"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/routes"
 	"log"
 	"net/http"
@@ -21,10 +23,12 @@ func main() {
 	db := dbcon.New(ctx, cfg.DB)
 	postsRepo := posts.New(db)
 	usersRepo := users.New(db)
+	commentsRepo := comments.New(db)
 	sessionManager := session.New(db)
 	authManager := auth.New(authSecret, sessionManager, usersRepo)
+	redditService := reddit.New(authManager, usersRepo, postsRepo, commentsRepo)
 
-	httpHandler := routes.New(authSecret, authManager, usersRepo, postsRepo).
+	httpHandler := routes.New(authSecret, authManager, usersRepo, postsRepo, commentsRepo, redditService).
 		InitRoutes()
 
 	log.Println("Listening on :8080...")

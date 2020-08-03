@@ -21,14 +21,24 @@ type Routes struct {
 	auth       interfaces.AuthManager
 	users      interfaces.UsersRepository
 	posts      interfaces.PostRepository
+	comments   interfaces.CommentsRepository
+	reddit     interfaces.RedditService
 }
 
-func New(authSecret []byte, auth interfaces.AuthManager, users interfaces.UsersRepository, posts interfaces.PostRepository) *Routes {
+func New(authSecret []byte,
+	auth interfaces.AuthManager,
+	users interfaces.UsersRepository,
+	posts interfaces.PostRepository,
+	comments interfaces.CommentsRepository,
+	reddit interfaces.RedditService,
+) *Routes {
 	return &Routes{
 		auth:       auth,
 		authSecret: authSecret,
 		users:      users,
 		posts:      posts,
+		comments:   comments,
+		reddit:     reddit,
 	}
 }
 
@@ -61,6 +71,8 @@ func (c *Routes) InitRoutes() *chi.Mux {
 	r.Get("/api/post/{post_id}/unvote", c.unVote)
 	r.Get("/api/post/{post_id}/downvote", c.downVote)
 	r.Delete("/api/post/{post_id}", c.deletePost)
+	r.Post("/api/post/{post_id}", c.addComment)
+	r.Delete("/api/post/{post_id}/{comment_id}", c.deleteComment)
 
 	r.Get("/api/posts/*", func(w http.ResponseWriter, r *http.Request) {
 		myUrl, err := url.Parse(r.URL.Path)
@@ -122,14 +134,13 @@ func staticRoutes(r chi.Router) {
 	})
 
 	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(""))
+		_, _ = w.Write([]byte(""))
 	})
 	r.Head("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(""))
+		_, _ = w.Write([]byte(""))
 	})
-
 	r.Get("/manifest.json", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(""))
+		_, _ = w.Write([]byte(""))
 	})
 
 	filesDir := http.Dir(filepath.Join(workDir, "web/static"))

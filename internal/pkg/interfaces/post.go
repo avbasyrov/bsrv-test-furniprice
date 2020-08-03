@@ -19,6 +19,7 @@ type Post struct {
 	Category         string
 	Type             string
 	Votes            string
+	Comments         string
 }
 
 type PostRepository interface {
