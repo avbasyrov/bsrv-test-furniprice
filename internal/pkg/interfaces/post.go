@@ -29,6 +29,7 @@ type PostRepository interface {
 	ByCategory(ctx context.Context, category string) ([]Post, error)
 	ByAuthor(ctx context.Context, authorID int) ([]Post, error)
 	GetByID(ctx context.Context, postID string) (Post, error)
+	IncrementViews(ctx context.Context, postID string) error
 	VoteUp(ctx context.Context, postID string, userID int) error
 	UnVote(ctx context.Context, postID string, userID int) error
 	VoteDown(ctx context.Context, postID string, userID int) error

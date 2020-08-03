@@ -74,13 +74,16 @@ func staticRoutes(r chi.Router) {
 	webDir := http.Dir(filepath.Join(workDir, "web"))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "text/html; charset=utf-8")
 		http.ServeFile(w, r, string(webDir)+"/index.html")
 	})
 	r.Get("/u/*", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		w.Header().Add("Content-Type", "text/html; charset=utf-8")
+		http.ServeFile(w, r, string(webDir)+"/index.html")
 	})
 	r.Get("/a/*", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		w.Header().Add("Content-Type", "text/html; charset=utf-8")
+		http.ServeFile(w, r, string(webDir)+"/index.html")
 	})
 
 	filesDir := http.Dir(filepath.Join(workDir, "web/static"))

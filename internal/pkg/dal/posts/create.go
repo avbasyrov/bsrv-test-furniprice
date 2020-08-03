@@ -18,3 +18,13 @@ func (p *Posts) Create(ctx context.Context, title string, authorID int, url stri
 
 	return p.GetByID(ctx, postID)
 }
+
+func (p *Posts) Delete(ctx context.Context, postID string, userID int) error {
+	_, err := p.db.Sqlx.ExecContext(ctx, "DELETE FROM public.posts WHERE id = $1 AND author_id = $2", postID, userID)
+	return err
+}
+
+func (p *Posts) IncrementViews(ctx context.Context, postID string) error {
+	_, err := p.db.Sqlx.ExecContext(ctx, "UPDATE public.posts SET views = views + 1 WHERE id = $1", postID)
+	return err
+}

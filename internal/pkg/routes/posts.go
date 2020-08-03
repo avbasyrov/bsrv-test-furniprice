@@ -109,6 +109,10 @@ func (c *Routes) listPostsByCategory(w http.ResponseWriter, r *http.Request) {
 
 func (c *Routes) getByID(w http.ResponseWriter, r *http.Request) {
 	postID := chi.URLParam(r, "post_id")
+	err := c.reddit.IncrementViews(r.Context(), postID)
+	if err != nil {
+		log.Println(err)
+	}
 	c.respondWithPost(w, r, postID)
 }
 

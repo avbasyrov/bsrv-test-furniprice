@@ -19,4 +19,5 @@ type RedditService interface {
 	PostsGetByAuthor(ctx context.Context, userID int) ([]Post, error)
 	PostsGetByCategory(ctx context.Context, category string) ([]Post, error)
 	PostsGetAll(ctx context.Context) ([]Post, error)
+	IncrementViews(ctx context.Context, postID string) error
 }

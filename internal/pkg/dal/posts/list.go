@@ -29,35 +29,31 @@ const selectQuery = "SELECT p.id, p.views, p.title, p.url, p.text, p.created, " 
 	") AS comments " +
 	"FROM posts p " +
 	"LEFT JOIN users u ON u.id = p.author_id "
+const orderBy = " ORDER BY p.created DESC "
 
 func (p *Posts) List(ctx context.Context) ([]interfaces.Post, error) {
 	var posts []interfaces.Post
-	err := p.db.Sqlx.SelectContext(ctx, &posts, selectQuery)
+	err := p.db.Sqlx.SelectContext(ctx, &posts, selectQuery+orderBy)
 	return posts, err
 }
 
 func (p *Posts) ByCategory(ctx context.Context, category string) ([]interfaces.Post, error) {
-	const query = selectQuery + "WHERE p.category = $1"
+	const query = selectQuery + "WHERE p.category = $1" + orderBy
 	var posts []interfaces.Post
 	err := p.db.Sqlx.SelectContext(ctx, &posts, query, category)
 	return posts, err
 }
 
 func (p *Posts) GetByID(ctx context.Context, postID string) (interfaces.Post, error) {
-	const query = selectQuery + "WHERE p.id = $1"
+	const query = selectQuery + "WHERE p.id = $1" + orderBy
 	var post interfaces.Post
 	err := p.db.Sqlx.GetContext(ctx, &post, query, postID)
 	return post, err
 }
 
 func (p *Posts) ByAuthor(ctx context.Context, authorID int) ([]interfaces.Post, error) {
-	const query = selectQuery + "WHERE p.author_id = $1"
+	const query = selectQuery + "WHERE p.author_id = $1" + orderBy
 	var posts []interfaces.Post
 	err := p.db.Sqlx.SelectContext(ctx, &posts, query, authorID)
 	return posts, err
-}
-
-func (p *Posts) Delete(ctx context.Context, postID string, userID int) error {
-	_, err := p.db.Sqlx.ExecContext(ctx, "DELETE FROM public.posts WHERE id = $1 AND author_id = $2", postID, userID)
-	return err
 }
