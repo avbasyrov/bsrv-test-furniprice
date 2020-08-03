@@ -57,7 +57,7 @@ func (p *Posts) ByAuthor(ctx context.Context, authorID int) ([]interfaces.Post, 
 	return posts, err
 }
 
-func (p *Posts) Delete(ctx context.Context, postID string) error {
-	_, err := p.db.Sqlx.ExecContext(ctx, "DELETE FROM public.posts WHERE id = $1", postID)
+func (p *Posts) Delete(ctx context.Context, postID string, userID int) error {
+	_, err := p.db.Sqlx.ExecContext(ctx, "DELETE FROM public.posts WHERE id = $1 AND author_id = $2", postID, userID)
 	return err
 }

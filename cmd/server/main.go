@@ -26,9 +26,9 @@ func main() {
 	commentsRepo := comments.New(db)
 	sessionManager := session.New(db)
 	authManager := auth.New(authSecret, sessionManager, usersRepo)
-	redditService := reddit.New(authManager, usersRepo, postsRepo, commentsRepo)
+	redditService := reddit.New(postsRepo, commentsRepo)
 
-	httpHandler := routes.New(authSecret, authManager, usersRepo, postsRepo, commentsRepo, redditService).
+	httpHandler := routes.New(authSecret, authManager, usersRepo, redditService).
 		InitRoutes()
 
 	log.Println("Listening on :8080...")

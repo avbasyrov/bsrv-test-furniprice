@@ -24,7 +24,7 @@ type Post struct {
 
 type PostRepository interface {
 	Create(ctx context.Context, title string, authorID int, url string, text string, category string, isLink bool) (Post, error)
-	Delete(ctx context.Context, postID string) error
+	Delete(ctx context.Context, postID string, userID int) error
 	List(ctx context.Context) ([]Post, error)
 	ByCategory(ctx context.Context, category string) ([]Post, error)
 	ByAuthor(ctx context.Context, authorID int) ([]Post, error)

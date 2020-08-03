@@ -1,16 +1,11 @@
 package routes
 
 import (
-	"context"
-	"encoding/json"
 	"github.com/avbasyrov/bsrv-test-furniprice/internal/pkg/interfaces"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"log"
 	"net/http"
-	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -20,24 +15,18 @@ type Routes struct {
 	authSecret []byte
 	auth       interfaces.AuthManager
 	users      interfaces.UsersRepository
-	posts      interfaces.PostRepository
-	comments   interfaces.CommentsRepository
 	reddit     interfaces.RedditService
 }
 
 func New(authSecret []byte,
 	auth interfaces.AuthManager,
 	users interfaces.UsersRepository,
-	posts interfaces.PostRepository,
-	comments interfaces.CommentsRepository,
 	reddit interfaces.RedditService,
 ) *Routes {
 	return &Routes{
 		auth:       auth,
 		authSecret: authSecret,
 		users:      users,
-		posts:      posts,
-		comments:   comments,
 		reddit:     reddit,
 	}
 }
@@ -56,6 +45,7 @@ func (c *Routes) InitRoutes() *chi.Mux {
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
 
+	// Set application-json header
 	r.Use(commonHeaders)
 
 	// Routes for index.html & /static/**
@@ -73,49 +63,9 @@ func (c *Routes) InitRoutes() *chi.Mux {
 	r.Delete("/api/post/{post_id}", c.deletePost)
 	r.Post("/api/post/{post_id}", c.addComment)
 	r.Delete("/api/post/{post_id}/{comment_id}", c.deleteComment)
-
-	r.Get("/api/posts/*", func(w http.ResponseWriter, r *http.Request) {
-		myUrl, err := url.Parse(r.URL.Path)
-		if err != nil {
-			log.Fatal(err)
-		}
-		category := path.Base(myUrl.Path)
-
-		ctx := context.Background()
-		allPosts, err := c.posts.ByCategory(ctx, category)
-		jsonData, status := toJSON(allPosts, err)
-		log.Println(status, string(jsonData))
-
-		w.WriteHeader(status)
-
-		_, err = w.Write(jsonData)
-		if err != nil {
-			log.Println(err)
-		}
-	})
+	r.Get("/api/posts/{category}", c.listPostsByCategory)
 
 	return r
-}
-
-func toJSON(data interface{}, err error) ([]byte, int) {
-	var jsonData []byte
-	status := 200 // HTTP: OK
-
-	if err != nil {
-		jsonData = []byte("Can't load data: " + err.Error())
-		status = 500
-		log.Println(status, string(jsonData))
-		return jsonData, status
-	}
-
-	jsonData, err = json.Marshal(data)
-	if err != nil {
-		jsonData = []byte("Can't marshall to JSON: " + err.Error())
-		status = 500
-	}
-
-	log.Println(status, string(jsonData))
-	return jsonData, status
 }
 
 func staticRoutes(r chi.Router) {
@@ -127,24 +77,21 @@ func staticRoutes(r chi.Router) {
 		http.ServeFile(w, r, string(webDir)+"/index.html")
 	})
 	r.Get("/u/*", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, string(webDir)+"/index.html")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
 	r.Get("/a/*", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, string(webDir)+"/index.html")
-	})
-
-	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(""))
-	})
-	r.Head("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(""))
-	})
-	r.Get("/manifest.json", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(""))
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
 
 	filesDir := http.Dir(filepath.Join(workDir, "web/static"))
 	fileServer(r, "/static", filesDir)
+}
+
+func commonHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		next.ServeHTTP(w, r)
+	})
 }
 
 // fileServer conveniently sets up a http.fileServer handler to serve
@@ -166,19 +113,4 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
 		fs.ServeHTTP(w, r)
 	})
-}
-
-func commonHeaders(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "application/json; charset=utf-8")
-		next.ServeHTTP(w, r)
-	})
-}
-
-func jsonReply(w http.ResponseWriter, status int, msg string) {
-	resp, _ := json.Marshal(map[string]interface{}{
-		"message": msg,
-	})
-	w.WriteHeader(status)
-	_, _ = w.Write(resp)
 }
