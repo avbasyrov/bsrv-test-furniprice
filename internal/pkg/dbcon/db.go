@@ -7,7 +7,9 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
+	"log"
 	"os"
+	"time"
 )
 
 type Db struct {
@@ -34,9 +36,22 @@ func connect(ctx context.Context, cfg config.DbConfig) *sqlx.DB {
 	//pgxConfig.ConnConfig.CustomCancel = func(_ *pgx.Conn) error { return nil }
 	//connConfig.Logger = myLogger
 	connStr := stdlib.RegisterConnConfig(pgxConfig.ConnConfig)
-	db, err := sqlx.Connect("pgx", connStr)
-	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "Unable to connect Sqlx:", err)
+
+	var db *sqlx.DB
+	for try := 1; try <= 10; try = try + 1 {
+		log.Printf("Try #%d to connect DB...\n", try)
+
+		db, err = sqlx.Connect("pgx", connStr)
+		if err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, "Unable to connect Sqlx:", err)
+			time.Sleep(3 * time.Second)
+		} else {
+			log.Println("Successfully connected to DB")
+			break
+		}
+	}
+
+	if db == nil {
 		os.Exit(1)
 	}
 
