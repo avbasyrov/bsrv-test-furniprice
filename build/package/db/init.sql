@@ -32,7 +32,7 @@ create table votes
 create unique index users_login_uindex
     on users (login);
 
-INSERT INTO public.users (password, admin, login) VALUES ('12345678', true, 'basyrov');
+INSERT INTO public.users (password, admin, login) VALUES ('$2a$08$MEXZpgo5BEloLRuicte/yObhVELHOdsS7W6nQdpT3w/lO8i1rylOu', true, 'admin');
 
 create table posts
 (

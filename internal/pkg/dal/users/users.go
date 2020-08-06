@@ -27,7 +27,7 @@ func (u *Users) GetByID(ctx context.Context, ID int) (interfaces.User, error) {
 }
 
 func (u *Users) Add(ctx context.Context, login string, password string) (interfaces.User, error) {
-	const query = "INSERT INTO public.users (login, password) VALUES ($1, $2) RETURNING id"
+	const query = "INSERT INTO public.users (login, password) VALUES ($1, crypt($2, gen_salt('bf', 8))) RETURNING id"
 	lastInsertId := 0
 
 	row := u.db.Sqlx.QueryRowContext(ctx, query, login, password)
@@ -47,7 +47,7 @@ func (u *Users) GetByLoginAndPassword(ctx context.Context, login string, passwor
 	const query = "SELECT id, login, login AS name, " +
 		"CASE WHEN admin IS true THEN 'admin' ELSE 'user' END AS role " +
 		"FROM public.users " +
-		"WHERE login = $1 AND password = $2"
+		"WHERE login = $1 AND password = crypt($2, password)"
 	var user interfaces.User
 	err := u.db.Sqlx.GetContext(ctx, &user, query, login, password)
 	return user, err

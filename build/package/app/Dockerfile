@@ -24,6 +24,7 @@ RUN go build -o /go/bin/app ./cmd/server
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
+COPY ./web /web
 
 ARG DB_PWD
 ARG DB_NAME
