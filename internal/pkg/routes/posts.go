@@ -57,7 +57,7 @@ func (c *Routes) createPost(w http.ResponseWriter, r *http.Request) {
 
 	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
 	if err != nil {
-		jsonReply(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "unauthorized")
 		return
 	}
 
@@ -150,7 +150,7 @@ func (c *Routes) deletePost(w http.ResponseWriter, r *http.Request) {
 
 	userID, _, err := c.auth.GetAuthorized(r.Context(), r.Header.Get("authorization"))
 	if err != nil {
-		jsonReply(w, http.StatusForbidden, "auth error")
+		jsonReply(w, http.StatusForbidden, "unauthorized")
 		return
 	}
 

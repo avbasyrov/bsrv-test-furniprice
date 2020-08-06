@@ -82,6 +82,7 @@ func (c *Routes) register(w http.ResponseWriter, r *http.Request) {
 	resp, _ := json.Marshal(map[string]interface{}{
 		"token": tokenString,
 	})
+	w.WriteHeader(http.StatusCreated)
 	_, _ = w.Write(resp)
 	_, _ = w.Write([]byte("\n\n"))
 }

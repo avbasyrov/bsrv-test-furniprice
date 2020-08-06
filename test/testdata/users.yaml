@@ -1,0 +1,9 @@
+users:
+  - id: 1000000
+    login: Admin
+    password: 12345678
+    admin: true
+  - id: 123
+    login: some_login
+    password: 34sdfgsdgsd
+    admin: false

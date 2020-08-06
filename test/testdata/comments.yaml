@@ -1,0 +1,9 @@
+comments:
+  - id: a9d5479b-60b0-4253-8ac5-7e3e635129af
+    post_id: 5005cbe1-7c76-45af-848c-617f90ba79dd
+    body: "comment of admin user to own post"
+    author_id: 1000000
+  - id: 09d5479b-60b0-4253-8ac5-7e3e635129af
+    post_id: 1005cbe1-7c76-45af-848c-617f90ba79dd
+    body: "comment of admin user to not own post"
+    author_id: 1000000

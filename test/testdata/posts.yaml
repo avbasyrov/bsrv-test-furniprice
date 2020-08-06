@@ -1,0 +1,13 @@
+posts:
+  - id: 5005cbe1-7c76-45af-848c-617f90ba79dd
+    title: "some title of admin user"
+    author_id: 1000000
+    category: news
+    is_link: false
+    text: "some text"
+  - id: 1005cbe1-7c76-45af-848c-617f90ba79dd
+    title: "some title of other "
+    author_id: 123
+    category: news
+    is_link: false
+    text: "some text"
