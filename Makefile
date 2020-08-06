@@ -81,8 +81,8 @@ docker-db-run:
 		$(DOCKER_DB_CONTAINER)-image
 
 clean:
-	sudo docker stop $(DOCKER_APP_CONTAINER) || true
-	sudo docker stop $(DOCKER_DB_CONTAINER) || true
-	sudo docker rm $(DOCKER_APP_CONTAINER) || true
-	sudo docker rm $(DOCKER_DB_CONTAINER) || true
-	sudo docker network rm $(DOCKER_NETWORK) || true
+	docker stop $(DOCKER_APP_CONTAINER) || true
+	docker stop $(DOCKER_DB_CONTAINER) || true
+	docker rm $(DOCKER_APP_CONTAINER) || true
+	docker rm $(DOCKER_DB_CONTAINER) || true
+	docker network rm $(DOCKER_NETWORK) || true
